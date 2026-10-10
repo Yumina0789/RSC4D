@@ -1,0 +1,11 @@
+[package]
+name = "rs-c4d"
+version = "0.1.0"
+edition = "2021"
+description = "Minimal KMS server for the KMS wire protocol (v4/v5/v6)"
+license = "GPL-3.0-or-later"
+
+[dependencies]
+sha2 = "0.10"
+hmac = "0.12"
+getrandom = "0.2"
