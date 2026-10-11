@@ -31,7 +31,7 @@ pub fn encrypt_cbc(ctx: &AesCtx, iv: Option<&[u8; 16]>, data: &mut Vec<u8>) {
 pub fn decrypt_cbc(ctx: &AesCtx, iv: Option<&[u8; 16]>, data: &mut [u8]) {
     assert!(
         data.len().is_multiple_of(16),
-        "CBC 数据长度必须是 16 的倍数"
+        "CBC data length must be a multiple of 16"
     );
     let blocks = data.len() / 16;
     if blocks == 0 {

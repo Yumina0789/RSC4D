@@ -257,12 +257,12 @@ mod tests {
         assert_ne!(
             create_v6_hmac(t, &enc, 0),
             create_v6_hmac(t, &enc, 1),
-            "±1 时隙必须得到不同的 HMAC"
+            "±1 time slot must produce a different HMAC"
         );
         assert_eq!(
             create_v6_hmac(t, &enc, 0),
             create_v6_hmac(t, &enc, 0),
-            "同时隙必须稳定"
+            "the same time slot must be stable"
         );
     }
 

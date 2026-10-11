@@ -1,5 +1,5 @@
 [package]
-name = "rs-c4d"
+name = "rsc4d"
 version = "0.1.0"
 edition = "2021"
 description = "Minimal KMS server for the KMS wire protocol (v4/v5/v6)"

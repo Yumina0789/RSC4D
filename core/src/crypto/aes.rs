@@ -249,7 +249,7 @@ mod tests {
         let mut b = plain;
         AesCtx::new(&key, true).encrypt_block(&mut b);
 
-        assert_ne!(a, b, "is_v6 的 round key 魔改没有生效");
+        assert_ne!(a, b, "the is_v6 round key patch had no effect");
     }
 
     #[test]

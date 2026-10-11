@@ -76,7 +76,7 @@ pub fn serve(cfg: ServerConfig) -> io::Result<()> {
 pub fn serve_on(listener: TcpListener, cfg: ServerConfig) -> io::Result<()> {
     let local = listener.local_addr()?;
     eprintln!(
-        "rs-c4d 已在 {} 上监听（并发上限 {}，产品严格模式 {}，时钟校验 {}）",
+        "rsc4d listening on {} (concurrency limit {}, strict product mode {}, client time check {})",
         local, cfg.max_tasks, cfg.kms.strict_products, cfg.kms.check_client_time
     );
 
@@ -87,7 +87,7 @@ pub fn serve_on(listener: TcpListener, cfg: ServerConfig) -> io::Result<()> {
         let stream = match incoming {
             Ok(s) => s,
             Err(e) => {
-                eprintln!("accept 失败: {}", e);
+                eprintln!("accept failed: {}", e);
                 continue;
             }
         };
@@ -98,7 +98,7 @@ pub fn serve_on(listener: TcpListener, cfg: ServerConfig) -> io::Result<()> {
         std::thread::spawn(move || {
             if let Err(e) = handle_connection(stream, &cfg, assoc_group) {
                 if cfg.verbose {
-                    eprintln!("连接结束（{}）", e);
+                    eprintln!("connection finished ({})", e);
                 }
             }
             sem.release();
@@ -152,7 +152,7 @@ pub fn handle_connection(
                 );
                 if cfg.verbose {
                     eprintln!(
-                        "[{}] {} {}（NDR32 ctx={} / NDR64 ctx={}）",
+                        "[{}] {} {} (NDR32 ctx={} / NDR64 ctx={})",
                         peer,
                         if ack_type == rpc::PT_BIND_ACK {
                             "bind"
@@ -160,9 +160,9 @@ pub fn handle_connection(
                             "alter-context"
                         },
                         if resp.state.ndr64_ctx != rpc::RPC_INVALID_CTX {
-                            "接受 NDR64"
+                            "accepting NDR64"
                         } else {
-                            "接受 NDR32"
+                            "accepting NDR32"
                         },
                         resp.state.ndr32_ctx,
                         resp.state.ndr64_ctx
@@ -209,7 +209,7 @@ pub fn handle_connection(
                             kms_response.len(),
                         ),
                         Err(hresult) => eprintln!(
-                            "[{}] KMS 请求被拒：HRESULT 0x{:08X}（{} 字节）",
+                            "[{}] KMS request rejected: HRESULT 0x{:08X} ({} bytes)",
                             peer,
                             hresult,
                             payload.data.len()
@@ -228,7 +228,7 @@ pub fn handle_connection(
 fn log_request(peer: &str, info: Option<codec::RequestInfo>, response_len: usize) {
     match info {
         Some(i) => eprintln!(
-            "[{}] KMS {} KMSID={:02x?} CMID={:02x?} Count={} 产品={} → 响应 {} 字节",
+            "[{}] KMS {} KMSID={:02x?} CMID={:02x?} Count={} product={} → response {} bytes",
             peer,
             match i.version {
                 codec::ProtocolVersion::V4 => "v4",
@@ -238,9 +238,9 @@ fn log_request(peer: &str, info: Option<codec::RequestInfo>, response_len: usize
             i.kms_id,
             i.cmid,
             i.count,
-            i.product.unwrap_or("(未命中，回退首条 CSVLK)"),
+            i.product.unwrap_or("(no match, falling back to the first CSVLK)"),
             response_len
         ),
-        None => eprintln!("[{}] KMS 请求无法解析 → 响应 {} 字节", peer, response_len),
+        None => eprintln!("[{}] KMS request could not be parsed → response {} bytes", peer, response_len),
     }
 }

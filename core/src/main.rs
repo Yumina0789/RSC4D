@@ -2,16 +2,16 @@
 
 use std::process::ExitCode;
 
-use rs_c4d::kms::Config;
-use rs_c4d::transport::{serve, ServerConfig};
+use rsc4d::kms::Config;
+use rsc4d::transport::{serve, ServerConfig};
 
 const USAGE: &str = "\
-rs-c4d —— 最小 KMS 服务端（协议 v4 / v5 / v6）
+rsc4d — minimal KMS server (protocol v4 / v5 / v6)
 
-用法：
-  rs-c4d [选项]
+Usage:
+  rsc4d [options]
 
-选项：
+Options:
   --listen <addr>
   --port <port>
   --pids <n>
@@ -34,7 +34,7 @@ fn main() -> ExitCode {
             match args.get(i) {
                 Some(v) => Some(v.clone()),
                 None => {
-                    eprintln!("参数 {} 缺少取值", name);
+                    eprintln!("missing value for argument {}", name);
                     None
                 }
             }
@@ -48,14 +48,14 @@ fn main() -> ExitCode {
             "--port" => match next_value("--port").and_then(|v| v.parse::<u16>().ok()) {
                 Some(v) => cfg.port = v,
                 None => {
-                    eprintln!("--port 需要一个 0-65535 的整数");
+                    eprintln!("--port requires an integer in 0-65535");
                     return ExitCode::FAILURE;
                 }
             },
             "--pids" => match next_value("--pids").and_then(|v| v.parse::<usize>().ok()) {
                 Some(v) if v > 0 => cfg.max_tasks = v,
                 _ => {
-                    eprintln!("--pids 需要一个正整数");
+                    eprintln!("--pids requires a positive integer");
                     return ExitCode::FAILURE;
                 }
             },
@@ -67,7 +67,7 @@ fn main() -> ExitCode {
                 return ExitCode::SUCCESS;
             }
             other => {
-                eprintln!("未知参数：{}（用 --help 看用法）", other);
+                eprintln!("unknown argument: {} (use --help for usage)", other);
                 return ExitCode::FAILURE;
             }
         }
@@ -79,7 +79,7 @@ fn main() -> ExitCode {
     match serve(cfg) {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
-            eprintln!("启动失败：{}", e);
+            eprintln!("startup failed: {}", e);
             ExitCode::FAILURE
         }
     }

@@ -57,20 +57,20 @@ mod tests {
 
     #[test]
     fn generated_tables_are_consistent() {
-        assert!(!CSVLK.is_empty(), "CSVLK 表为空");
-        assert!(!PRODUCTS.is_empty(), "PRODUCTS 表为空");
+        assert!(!CSVLK.is_empty(), "CSVLK table is empty");
+        assert!(!PRODUCTS.is_empty(), "PRODUCTS table is empty");
 
         for p in PRODUCTS {
-            assert!(p.csvlk_index < CSVLK.len(), "{}: csvlk_index 越界", p.name);
+            assert!(p.csvlk_index < CSVLK.len(), "{}: csvlk_index out of bounds", p.name);
             assert!(
                 (4..=6).contains(&p.protocol_version),
-                "{}: 协议版本 {} 不在 4..=6",
+                "{}: protocol version {} not in 4..=6",
                 p.name,
                 p.protocol_version
             );
         }
         for c in CSVLK {
-            assert!(!c.epid.is_empty(), "ePID 为空");
+            assert!(!c.epid.is_empty(), "ePID is empty");
         }
     }
 
@@ -78,11 +78,11 @@ mod tests {
     fn table_covers_windows_and_office() {
         assert!(
             PRODUCTS.iter().any(|p| p.name.contains("Windows")),
-            "缺 Windows 产品"
+            "no Windows product"
         );
         assert!(
             PRODUCTS.iter().any(|p| p.name.contains("Office")),
-            "缺 Office 产品"
+            "no Office product"
         );
     }
 
@@ -90,17 +90,17 @@ mod tests {
     fn epid_templates_are_well_formed() {
         for c in CSVLK {
             let parts: Vec<&str> = c.epid.split('-').collect();
-            assert!(parts.len() >= 5, "{:?}: 段数不足", c.epid);
+            assert!(parts.len() >= 5, "{:?}: too few segments", c.epid);
             assert!(
                 parts[0].len() == 5 && parts[0].chars().all(|ch| ch.is_ascii_digit()),
-                "{:?}: 平台段应为 5 位数字",
+                "{:?}: platform segment must be 5 digits",
                 c.epid
             );
-            assert_eq!(parts[4], "03", "{:?}: 版本段应为 03", c.epid);
+            assert_eq!(parts[4], "03", "{:?}: version segment must be 03", c.epid);
             assert_eq!(
                 parts[1].parse::<u32>().unwrap(),
                 c.group_id,
-                "{:?}: 组段与 GroupId 不一致",
+                "{:?}: group segment does not match GroupId",
                 c.epid
             );
         }

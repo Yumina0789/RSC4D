@@ -100,19 +100,19 @@ impl RpcHeader {
 
     pub fn validate(&self, desired_packet_type: u8) -> Result<(), &'static str> {
         if self.version_major != 5 || self.version_minor != 0 {
-            return Err("RPC 版本不是 5.0");
+            return Err("RPC version is not 5.0");
         }
         if self.packet_type != desired_packet_type {
-            return Err("RPC 包类型不符");
+            return Err("RPC packet type mismatch");
         }
         if self.data_representation != DATA_REPRESENTATION {
-            return Err("RPC DataRepresentation 不是小端/ASCII/IEEE");
+            return Err("RPC DataRepresentation is not little-endian/ASCII/IEEE");
         }
         if self.auth_length != 0 {
-            return Err("RPC 请求带鉴权，不支持");
+            return Err("RPC request carries authentication, which is not supported");
         }
         if self.packet_flags & (PF_FIRST | PF_LAST) != (PF_FIRST | PF_LAST) {
-            return Err("RPC 分片标志不是 FIRST|LAST，不支持多分片");
+            return Err("RPC fragment flags are not FIRST|LAST, multi-fragment is not supported");
         }
         Ok(())
     }
@@ -145,20 +145,20 @@ pub fn read_frame<R: Read>(stream: &mut R) -> io::Result<Option<(RpcHeader, Vec<
             return if filled == 0 {
                 Ok(None)
             } else {
-                Err(io::Error::new(io::ErrorKind::UnexpectedEof, "RPC 头被截断"))
+                Err(io::Error::new(io::ErrorKind::UnexpectedEof, "RPC header truncated"))
             };
         }
         filled += n;
     }
 
     let header = RpcHeader::parse(&head)
-        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "RPC 头长度不足"))?;
+        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "RPC header too short"))?;
 
     let body_len = header.frag_length as usize;
     if body_len < RPC_HEADER_SIZE || body_len - RPC_HEADER_SIZE > MAX_FRAME_BODY {
         return Err(io::Error::new(
             io::ErrorKind::InvalidData,
-            format!("RPC FragLength 不合理: {}", header.frag_length),
+            format!("unreasonable RPC FragLength: {}", header.frag_length),
         ));
     }
 
@@ -490,7 +490,7 @@ mod tests {
             (TRANSFER_SYNTAX_NDR64, 1),
             (BIND_TIME_FEATURE_NEGOTIATION, 1),
         ]);
-        let req = parse_bind_request(&body).expect("bind 应能解析");
+        let req = parse_bind_request(&body).expect("bind should parse");
         assert_eq!(req.ctx_items.len(), 3);
 
         let header =
@@ -583,13 +583,13 @@ mod tests {
         assert_eq!(h.packet_type, PT_RESPONSE);
         assert_eq!(h.call_id, 7);
         assert_eq!(h.frag_length as usize, frame.len());
-        assert_eq!(frame.len() % 4, 0, "响应长度必须 4 字节对齐");
+        assert_eq!(frame.len() % 4, 0, "response length must be 4-byte aligned");
 
         let body = &frame[RPC_HEADER_SIZE..];
         assert_eq!(
             u32le(body, 0) as usize,
             body.len() - 8,
-            "AllocHint 不含 8 字节前缀"
+            "AllocHint excludes the 8-byte prefix"
         );
         assert_eq!(u16le(body, 4), 0);
         assert_eq!(u32le(body, 8), 100);
