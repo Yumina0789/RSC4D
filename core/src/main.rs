@@ -12,16 +12,14 @@ rs-c4d —— 最小 KMS 服务端（协议 v4 / v5 / v6）
   rs-c4d [选项]
 
 选项：
-  --listen <addr>          监听地址（默认 0.0.0.0）
-  --port <port>            监听端口（默认 1688）
-  --pids <n>               同时处理的连接上限（默认 64）
-  --verbose                逐请求日志
-  --strict-products        未知 KMSID 直接拒绝（默认：回退首条 CSVLK）
-  --check-client-time      校验客户端时钟是否在 ±4 小时内（默认关）
-  -h, --help               显示本帮助
+  --listen <addr>
+  --port <port>
+  --pids <n>
+  --verbose
+  --strict-products
+  --check-client-time
+  -h, --help
 
-说明：
-  客户端侧需要 GVLK 与 KMS 主机地址；本程序不附带任何产品密钥。
 ";
 
 fn main() -> ExitCode {
